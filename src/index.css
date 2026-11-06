@@ -1,0 +1,15 @@
+@tailwind base;@tailwind components;@tailwind utilities;
+html{scroll-behavior:smooth}
+body{@apply bg-surface text-on-surface font-sans antialiased overflow-x-hidden}
+::selection{background:#b0f1cd;color:#14422d}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap;-webkit-font-smoothing:antialiased;font-size:24px}
+.btn{@apply relative inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-bold transition-colors select-none}
+.btn-accent{@apply bg-tertiary-container text-white shadow-[0_10px_30px_-10px_rgba(153,40,6,.6)] hover:bg-tertiary}
+.btn-ghost{@apply bg-white/70 text-primary ring-1 ring-primary/10 backdrop-blur hover:bg-white}
+.wrap{@apply mx-auto max-w-7xl px-5 md:px-8}
+.eyebrow{@apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.2em] text-secondary before:block before:h-px before:w-8 before:bg-secondary/60}
+.h1{@apply font-display text-5xl md:text-7xl font-semibold tracking-tight text-primary leading-[1.02]}
+.h2{@apply font-display text-3xl md:text-5xl font-semibold tracking-tight text-primary leading-[1.1]}
+.card{@apply relative rounded-3xl bg-white p-7 border border-primary-container/10 shadow-[0_1px_2px_rgba(20,66,45,.04)] transition-shadow duration-300 hover:shadow-[0_30px_60px_-30px_rgba(20,66,45,.35)]}
+.input{@apply w-full rounded-xl border border-[#d8d3c5] bg-[#f4f1ea] px-4 py-3 text-sm transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-container}
+.grain::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.07;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
