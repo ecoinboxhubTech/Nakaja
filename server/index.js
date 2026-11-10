@@ -1,6 +1,7 @@
 import http from 'node:http'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { gzipSync } from 'node:zlib'
 import { fileURLToPath } from 'node:url'
 import { chatReply, draftEmail, aiEnabled } from './ai.js'
 import { sendMail, STAFF, FROM } from './mail.js'
@@ -89,12 +90,28 @@ async function inbound(req, res, url) {
 
 /* ── static files (production) ───────────────────────── */
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.json': 'application/json', '.xml': 'application/xml', '.txt': 'text/plain', '.webmanifest': 'application/manifest+json' }
+const SEC = { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'X-Frame-Options': 'SAMEORIGIN', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()' }
+const NOT_FOUND = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found | Nakajah Care Foundation</title><style>body{font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;background:#fff7fb;color:#16163a;text-align:center}a{color:#ec1c8c;font-weight:700}</style></head><body><div><h1>Page not found</h1><p>The page you are looking for does not exist.</p><p><a href="/">Back to the Nakajah Care Foundation homepage</a></p></div></body></html>'
+const cache = new Map()
 async function serve(req, res, url) {
-  let p = path.join(DIST, decodeURIComponent(url.pathname))
+  let pathname; try { pathname = decodeURIComponent(url.pathname) } catch { pathname = '/' }
+  if (pathname.length > 1 && pathname.endsWith('/')) { res.writeHead(301, { Location: pathname.slice(0, -1) + url.search }); return res.end() } // one canonical URL
+  const rel = pathname === '/' ? '/index.html' : pathname
+  const p = path.join(DIST, rel)
   if (!p.startsWith(DIST)) { res.writeHead(403); return res.end() }
-  try { var data = await readFile(p) } catch { p = path.join(DIST, 'index.html'); try { data = await readFile(p) } catch { res.writeHead(404); return res.end('Run "npm run build" first.') } }
-  res.writeHead(200, { 'Content-Type': TYPES[path.extname(p)] || 'application/octet-stream', 'Cache-Control': p.includes('/assets/') ? 'public,max-age=31536000,immutable' : 'no-cache' })
-  res.end(data)
+  let data; try { data = await readFile(p) } catch {
+    // Real 404 for unknown URLs (a 200 "soft 404" on every path hurts SEO). Only the homepage is the app.
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', ...SEC, 'X-Robots-Tag': 'noindex' }); return res.end(NOT_FOUND)
+  }
+  const ext = path.extname(p), type = TYPES[ext] || 'application/octet-stream'
+  const headers = { 'Content-Type': type + (/^text|json|xml|javascript|svg/.test(type) ? '; charset=utf-8' : ''), ...SEC,
+    'Cache-Control': p.includes(path.sep + 'assets' + path.sep) || /^\.(png|jpg|svg|webp)$/.test(ext) ? 'public,max-age=31536000,immutable' : 'public,max-age=0,must-revalidate' }
+  if (/^\.(png|jpg)$/.test(ext) && !p.includes(path.sep + 'assets' + path.sep)) headers['Cache-Control'] = 'public,max-age=86400' // un-hashed images: 1 day
+  if (/^\.(html|js|css|svg|json|xml|txt|webmanifest)$/.test(ext) && /\bgzip\b/.test(req.headers['accept-encoding'] || '')) {
+    let z = cache.get(p); if (!z || z.src !== data) { z = { src: data, gz: gzipSync(data) }; cache.set(p, z) }
+    headers['Content-Encoding'] = 'gzip'; headers.Vary = 'Accept-Encoding'; data = z.gz
+  }
+  res.writeHead(200, headers); res.end(data)
 }
 
 http.createServer(async (req, res) => {

@@ -1,5 +1,9 @@
 import React from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-createRoot(document.getElementById('root')).render(<App />)
+
+const root = document.getElementById('root')
+// Production builds are pre-rendered (see scripts/prerender.mjs), so hydrate; dev server renders from scratch.
+if (root.hasChildNodes()) hydrateRoot(root, <App />)
+else createRoot(root).render(<App />)

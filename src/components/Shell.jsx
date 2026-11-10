@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useScroll, useSpring } from 'framer-motion'
 import { NAV } from '../data.js'
 import { Reveal, Tap, ease } from './motion.jsx'
 
-export const Icon = ({ n, c = '' }) => <span className={`ms ${c}`} aria-hidden="true">{n}</span>
+export const Icon = ({ n, c = '' }) => <span className={`ms ${c}`} data-i={n} aria-hidden="true" />
 
 /** Heart-in-hands ring mark used beside the wordmark. */
 export const Mark = ({ size = 40 }) => (

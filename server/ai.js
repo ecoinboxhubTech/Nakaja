@@ -1,8 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { FAQ_TEXT } from './knowledge.js'
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5'
-const client = process.env.ANTHROPIC_API_KEY ? new Anthropic() : null
+const MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
+const API_KEY = process.env.GROQ_API_KEY
+const client = API_KEY ? true : null
 export const aiEnabled = !!client
 
 const RULES = `You are the NAKAJAH Assistant, the AI helper on the website of Nakajah Care Foundation, a Nigerian non-profit that creates safe spaces where children, women and young people are heard, protected, mentored, educated and empowered.
@@ -20,17 +20,18 @@ KNOWLEDGE:
 ${FAQ_TEXT}`
 
 async function ask({ system, messages, maxTokens }) {
-  const base = { model: MODEL, max_tokens: maxTokens, system, messages, output_config: { effort: 'low' } }
-  let r
-  try {
-    // Server-side refusal fallback (recommended for this model); fall back to a plain call if the platform rejects it.
-    r = await client.beta.messages.create({ ...base, betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' })
-  } catch (e) {
-    if (e instanceof Anthropic.BadRequestError) r = await client.messages.create(base)
-    else throw e
-  }
-  if (r.stop_reason === 'refusal') return null
-  return r.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim() || null
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${API_KEY}` },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: maxTokens,
+      messages: [{ role: 'system', content: system }, ...messages]
+    })
+  })
+  if (!res.ok) throw new Error(`Groq API error ${res.status}: ${await res.text()}`)
+  const data = await res.json()
+  return data.choices?.[0]?.message?.content?.trim() || null
 }
 
 // Without an API key the site still works: answer from the FAQ, otherwise hand off to the team.

@@ -49,9 +49,9 @@ export function Hero({ onSupport }) {
         <motion.div style={{ y }} className="lg:col-span-5" initial={{ opacity: 0, scale: 0.94, y: 40 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 0.3, duration: 1, ease }}>
           <div className="relative mx-auto max-w-[26rem] pb-6 pl-6 pr-4 pt-6">
             <div className="absolute inset-0 -rotate-3 rounded-[2.8rem] bg-gradient-to-br from-brand-400 to-sky-400 opacity-80" />
-            <img src="/img/founder.jpg" alt="Dr. Lilian Odinakachi Onyeizu, founder of NAKAJAH" className="relative aspect-[4/4.7] w-full rounded-[2.4rem] object-cover object-top shadow-soft ring-4 ring-white" />
+            <img src="/img/founder.jpg" alt="Dr. Lilian Odinakachi Onyeizu, founder of NAKAJAH Care Foundation" width="462" height="361" fetchpriority="high" decoding="async" className="relative aspect-[4/4.7] w-full rounded-[2.4rem] object-cover object-top shadow-soft ring-4 ring-white" />
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} className="absolute -left-2 bottom-24 w-28 rounded-full shadow-[0_20px_50px_-12px_rgba(236,28,140,.55)] ring-4 ring-white sm:-left-8 sm:w-32"><Badge className="w-full" /></motion.div>
-            <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }} className="absolute -top-1 right-0 w-20 rotate-6 overflow-hidden rounded-xl shadow-soft ring-2 ring-white sm:-right-4 sm:w-24"><img src="/img/book.jpg" alt="" className="w-full" /></motion.div>
+            <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }} className="absolute -top-1 right-0 w-20 rotate-6 overflow-hidden rounded-xl shadow-soft ring-2 ring-white sm:-right-4 sm:w-24"><img src="/img/book.jpg" alt="" width="238" height="312" className="w-full" /></motion.div>
             <div className="absolute inset-x-10 bottom-0 flex items-center gap-3 rounded-2xl bg-white/90 p-3 shadow-soft backdrop-blur sm:inset-x-14">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-500 text-white"><Icon n="shield_with_heart" /></span>
               <span className="text-sm font-bold leading-tight">Safe • Heard • Protected<span className="block text-xs font-medium text-ink-500">Child-safe by design</span></span>
@@ -251,7 +251,7 @@ export function Founder() {
           <Reveal className="lg:col-span-5">
             <div className="relative mx-auto max-w-sm">
               <div className="absolute -inset-3 rotate-3 rounded-[2rem] bg-gradient-to-br from-brand-300 to-sky-400 opacity-70" />
-              <img src="/img/founder.jpg" alt="Dr. Lilian Odinakachi Onyeizu, founder of NAKAJAH Care Foundation" loading="lazy" className="relative aspect-[4/4.4] w-full rounded-[1.8rem] object-cover object-top shadow-soft" />
+              <img src="/img/founder.jpg" alt="Dr. Lilian Odinakachi Onyeizu, founder of NAKAJAH Care Foundation" width="462" height="361" loading="lazy" decoding="async" className="relative aspect-[4/4.4] w-full rounded-[1.8rem] object-cover object-top shadow-soft" />
               <div className="absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-2xl bg-white/90 p-3 shadow-soft backdrop-blur"><span className="grid h-11 w-11 place-items-center rounded-full bg-brand-500 text-xs font-extrabold text-white">PhD</span><span className="text-sm"><b>10+ Years</b><span className="block text-xs text-ink-500">Gender & Development across Africa</span></span></div>
               <span className="absolute -right-3 -top-3 rotate-6 rounded-xl bg-sun-400 px-3 py-1.5 text-[10px] font-extrabold uppercase leading-tight tracking-wider text-ink shadow-soft">Founder<br />Voice</span>
             </div>
@@ -279,7 +279,7 @@ export function Book() {
       <div className="wrap">
         <Reveal><div className="relative grid items-center gap-8 overflow-hidden rounded-[2.2rem] bg-ink p-7 text-white shadow-soft md:grid-cols-12 md:p-12">
           <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-brand-500/25 blur-3xl" /><div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-sky-500/20 blur-3xl" />
-          <Tilt className="relative mx-auto w-48 md:col-span-3 md:w-full md:max-w-[220px]"><img src="/img/book.jpg" alt="Book cover: I Know Me. I Lead Me. I Choose Well." loading="lazy" className="rounded-2xl shadow-[0_30px_60px_-20px_rgba(0,0,0,.6)] ring-1 ring-white/10" /></Tilt>
+          <Tilt className="relative mx-auto w-48 md:col-span-3 md:w-full md:max-w-[220px]"><img src="/img/book.jpg" alt="Book cover: I Know Me. I Lead Me. I Choose Well. by Lilian Odinakachi Onyeizu" width="238" height="312" loading="lazy" decoding="async" className="rounded-2xl shadow-[0_30px_60px_-20px_rgba(0,0,0,.6)] ring-1 ring-white/10" /></Tilt>
           <div className="relative md:col-span-9">
             <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider ring-1 ring-white/15"><Icon n="auto_stories" c="!text-[14px]" />Featured publication</span>
             <h2 className="mt-4 text-3xl font-extrabold tracking-tight md:text-4xl">I KNOW ME. I LEAD ME. <span className="text-brand-400">I CHOOSE WELL.</span></h2>
@@ -331,7 +331,7 @@ export function Faq() {
             <Reveal key={q} delay={i * 0.05}><div className={`rounded-2xl bg-white ring-1 transition ${o === i ? 'ring-brand-300 shadow-soft' : 'ring-ink-200'}`}>
               <button onClick={() => setO(o === i ? -1 : i)} aria-expanded={o === i} className="flex w-full items-center justify-between gap-4 p-5 text-left font-bold md:p-6">{q}
                 <motion.span animate={{ rotate: o === i ? 45 : 0 }} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-500 text-white"><Icon n="add" c="!text-[20px]" /></motion.span></button>
-              <AnimatePresence initial={false}>{o === i && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden"><p className="px-5 pb-5 text-sm leading-relaxed text-ink-500 md:px-6 md:pb-6">{a}</p></motion.div>}</AnimatePresence>
+              <div className={`grid transition-[grid-template-rows] duration-300 ${o === i ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}><div className="overflow-hidden"><p className="px-5 pb-5 text-sm leading-relaxed text-ink-500 md:px-6 md:pb-6">{a}</p></div></div>
             </div></Reveal>))}
         </div>
       </div>
