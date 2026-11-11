@@ -4,7 +4,7 @@ import { esc } from './safety.js'
 export const STAFF = process.env.STAFF_EMAIL || 'hello@nakajahcare.org'
 export const FROM = process.env.MAIL_FROM || 'NAKAJAH Care Foundation <hello@nakajahcare.org>'
 
-/** Sends through Resend. With no RESEND_API_KEY it logs to server/outbox.log so the flow can be tested safely. */
+/** Sends through Resend. With no RESEND_API_KEY it logs to backend/outbox.log so the flow can be tested safely. */
 export async function sendMail({ to, subject, text, replyTo }) {
   const html = `<div style="font-family:system-ui,sans-serif;line-height:1.6;color:#16163a;white-space:pre-wrap">${esc(text)}</div>`
   if (!process.env.RESEND_API_KEY) {

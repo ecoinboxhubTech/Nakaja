@@ -9,7 +9,7 @@ import { isRisk, SAFE_REPLY, EMERGENCY_NOTE, limited, clip, emailOf } from './sa
 
 const PORT = Number(process.env.PORT || 8787)
 const AUTO = (process.env.AUTO_REPLY || 'draft') === 'auto' // 'draft' = AI drafts, staff approve; 'auto' = AI answers routine emails directly
-const DIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist')
+const DIST = path.resolve(process.env.FRONTEND_DIST || path.join(path.dirname(fileURLToPath(import.meta.url)), '../frontend/dist'))
 const OWN = emailOf(FROM)
 
 const json = (res, code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)) }

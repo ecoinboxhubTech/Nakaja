@@ -1,0 +1,12 @@
+{
+  "name": "nakajah-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "API and static file server for the Nakajah Care Foundation website (no third-party dependencies)",
+  "engines": { "node": ">=20.18" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env index.js",
+    "dev": "node --watch --env-file-if-exists=.env index.js"
+  }
+}

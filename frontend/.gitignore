@@ -2,15 +2,16 @@
 node_modules/
 
 # Build output
-dist/
+frontend/dist/
+frontend/dist-server/
 .vite/
 
-# Env & secrets
+# Env & secrets (never commit real keys)
 .env
 .env.*
 !.env.example
 
-# Logs
+# Logs (the mock mail outbox is backend/outbox.log)
 *.log
 npm-debug.log*
 pnpm-debug.log*
@@ -21,6 +22,3 @@ pnpm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
-
-server/outbox.log
-dist-server/
