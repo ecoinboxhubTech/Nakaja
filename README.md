@@ -17,11 +17,9 @@ It is more than a brochure site. Alongside the public pages it includes an **AI 
 5. [Tech stack](#5-tech-stack)
 6. [Getting started](#6-getting-started)
 7. [Configuration (environment variables)](#7-configuration-environment-variables)
-8. [API reference](#8-api-reference)
-9. [Updating content](#9-updating-content)
-10. [Deployment](#10-deployment)
-11. [Security and privacy notes](#11-security-and-privacy-notes)
-12. [Troubleshooting](#12-troubleshooting)
+8. [Deployment](#10-deployment)
+9. [Security and privacy notes](#11-security-and-privacy-notes)
+10. [Troubleshooting](#12-troubleshooting)
 
 ---
 
@@ -265,40 +263,8 @@ Frontend build option: set `SITE_URL` when building (for example `SITE_URL=https
 
 ---
 
-## 8. API reference
 
-| Endpoint | Description |
-|---|---|
-| `POST /api/chat` | AI assistant for visitors. Body: `{ "messages": [{ "role": "user" \| "assistant", "content": "..." }] }`. Returns `{ "reply": "...", "urgent": true? }`. Keeps the last 12 messages, 1,000 characters each. Limited to 25 messages per visitor per 10 minutes. |
-| `POST /api/contact` | Website contact form. Body: `{ name, email, topic, message, website }` (`website` is a hidden honeypot and must be empty). Sends the sender a confirmation (or the AI reply in auto mode) and notifies staff. Limited to 5 submissions per visitor per hour. |
-| `POST /api/inbound-email?secret=…` | Webhook for an email provider's inbound mail. Accepts `{ from, subject, text }` or `{ data: { from, subject, text } }`. Ignores no-reply and auto-generated mail, and limits each sender to 4 messages per day to avoid reply loops. Returns 401 without the correct secret. |
-| `GET /api/health` | Reports whether AI and email keys are configured and which reply mode is active. Contains no secrets. |
-
-All other paths serve the built website. Unknown URLs return a real HTTP 404 page, which is better for SEO than a "soft 404".
-
----
-
-## 9. Updating content
-
-| To change… | Edit… |
-|---|---|
-| Programmes, impact numbers, journey steps, values, ways to help, FAQ | `frontend/src/data.js` |
-| Hero text, story, founder and book sections, contact copy | `frontend/src/sections.jsx` |
-| Header, footer, logo, "Get support" panel, contact details in the footer | `frontend/src/components/Shell.jsx` |
-| Colours, fonts and shadows | `frontend/tailwind.config.js` |
-| Page title, description, social previews, structured data | `frontend/index.html` |
-| Photos, logo, icons | `frontend/public/` |
-| **What the AI assistant is allowed to say** | `backend/knowledge.js` |
-| AI tone and rules | `RULES` in `backend/ai.js` |
-| Safeguarding keywords and the emergency message | `backend/safety.js` |
-
-> **Keep content in sync.** The website copy (`frontend/src/data.js`) and the AI's knowledge (`backend/knowledge.js`) are separate files. When a programme, figure, contact detail or policy changes, update **both**, otherwise the assistant may give outdated answers.
-
-After changing frontend files, rebuild (`npm run build` in `frontend/`) before running the production server.
-
----
-
-## 10. Deployment
+## 8. Deployment
 
 The backend serves both the API and the built website, so a single Node process is enough.
 
@@ -313,7 +279,7 @@ The server compresses text responses with gzip, sets long cache lifetimes on has
 
 ---
 
-## 11. Security and privacy notes
+## 9. Security and privacy notes
 
 - **API keys stay on the server.** The browser never sees them; it only talks to `/api/*`.
 - **Never commit `.env`.** If a key was ever shared or committed, rotate it in the Groq / Resend dashboard.
@@ -324,7 +290,7 @@ The server compresses text responses with gzip, sets long cache lifetimes on has
 
 ---
 
-## 12. Troubleshooting
+## 10. Troubleshooting
 
 | Problem | Likely cause and fix |
 |---|---|
