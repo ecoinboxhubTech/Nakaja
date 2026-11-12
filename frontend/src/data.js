@@ -1,4 +1,4 @@
-export const NAV = [['home', 'Home'], ['about', 'About'], ['programs', 'What We Do'], ['values', 'Our Values'], ['founder', 'Founder'], ['contact', 'Contact']]
+export const NAV = [['home', 'Home'], ['about', 'About'], ['programs', 'What We Do'], ['gallery', 'Gallery'], ['values', 'Our Values'], ['founder', 'Founder'], ['contact', 'Contact']]
 
 export const PROGRAMS = [
   ['Mentorship & personal development', 'favorite', 'brand', 'One-to-one guidance and group mentorship that builds confidence, identity and life direction.', ['Monthly mentor circles', 'Goal-setting', 'Confidence workshops']],
@@ -57,3 +57,78 @@ export const TONES = {
   violet: ['bg-violet-100', 'text-violet-500'],
   mint: ['bg-mint-100', 'text-mint-500']
 }
+
+/* Gallery: add photos to a category's `photos` list as [file, width, height, alt]; files live in public/img/gallery/<id>/ */
+const G = (id, list) => list.map(([f, w, h, alt]) => ({ src: `/img/gallery/${id}/${f}`, w, h, alt }))
+export const GALLERY = [
+  { id: 'school-outreach', label: 'School Outreach', icon: 'school', blurb: 'Taking girl-child talks, life skills and mentorship into classrooms and school compounds.',
+    photos: G('school-outreach', [
+      ['11.jpg', 992, 744, 'Girls in pink with the NAKAJAH team at the Digital Generation Girl Child Day celebration'],
+      ['5.jpg', 867, 1156, 'Founder presenting an International Day of the Girl Child slide to a darkened classroom'],
+      ['2.jpg', 867, 1156, 'Founder speaking with nursery pupils in bright green kits in a school courtyard'],
+      ['7.jpg', 521, 1156, 'Girls in pink seated during the Girl Child Day programme'],
+      ['4.jpg', 1156, 521, 'Founder seated among nursery pupils in green kits'],
+      ['1.jpg', 867, 1156, 'Pupils seated on red chairs watching a projector presentation'],
+      ['8.jpg', 1156, 521, 'Girl Child Day group photo in front of the Digital Generation banner'],
+      ['3.jpg', 867, 1156, 'Young pupils looking up attentively as the founder speaks'],
+      ['6.jpg', 1156, 521, 'Founder and a colleague with nursery pupils after the session'],
+      ['9.jpg', 1156, 521, 'Girls in pink posing with the NAKAJAH team and school staff'],
+      ['10.jpg', 1156, 521, 'Founder with nursery pupils and school staff in the courtyard']
+    ]) },
+  { id: 'menstrual-hygiene', label: 'Menstrual Hygiene', icon: 'water_drop', blurb: 'Dignity, education and supplies for girls.',
+    photos: G('menstrual-hygiene', [
+      ['1.jpg', 810, 1080, 'Girls and women holding up sanitary pads after the menstrual hygiene session'],
+      ['6.jpg', 1080, 810, 'Schoolgirls in uniform holding up sanitary pads beside the founder'],
+      ['9.jpg', 608, 1080, 'Founder demonstrating pad use to students in a classroom'],
+      ['3.jpg', 810, 1080, 'Group photo of girls and guests celebrating with sanitary pads'],
+      ['5.jpg', 608, 1080, 'Students seated at desks during the menstrual hygiene talk'],
+      ['7.jpg', 608, 1080, 'Founder holding up a sanitary pad while teaching'],
+      ['4.jpg', 608, 1080, 'A student attentively opening her pack of sanitary pads'],
+      ['11.jpg', 810, 1080, 'Founder outside the school before the session'],
+      ['10.jpg', 608, 1080, 'Founder speaking to students about menstrual health'],
+      ['8.jpg', 608, 1080, 'Students sharing and opening sanitary pad packs at their desks'],
+      ['2.jpg', 810, 1080, 'Founder in conversation with a young woman before the programme'],
+      ['12.jpg', 651, 1156, 'Founder explaining menstrual hygiene to the class'],
+      ['14.jpg', 608, 1080, 'Students listening in class'],
+      ['13.jpg', 651, 1156, 'Founder with a box of sanitary pads facing the class']
+    ]) },
+  { id: 'feeding-the-street', label: 'Feeding the Street', icon: 'restaurant', blurb: 'Hot meals and care for people living on the street.',
+    photos: G('feeding-the-street', [
+      ['1.jpg', 576, 1280, 'The NAKAJAH team smiling together on the way to a feeding outreach']
+    ]) },
+  { id: 'christmas', label: 'Christmas', icon: 'redeem', blurb: 'Festive outreach, gifts and joy for children and families.',
+    photos: G('christmas', [
+      ['6.jpg', 810, 1080, 'Children and a volunteer sorting through donated clothes by the roadside'],
+      ['7.jpg', 810, 1080, 'Children picking out clothes and shoes from the donation display'],
+      ['8.jpg', 810, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['9.jpg', 810, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['10.jpg', 810, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['11.jpg', 563, 1000, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['12.jpg', 810, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['13.jpg', 608, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['14.jpg', 563, 1000, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['15.jpg', 810, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['16.jpg', 810, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['17.jpg', 810, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['18.jpg', 810, 1080, 'Volunteers and community members choosing clothes from the donated pile'],
+      ['19.jpg', 810, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['20.jpg', 608, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['21.jpg', 563, 1000, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['22.jpg', 563, 1000, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['23.jpg', 563, 1000, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['24.jpg', 563, 1000, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['25.jpg', 563, 1000, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['26.jpg', 608, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['27.jpg', 608, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['28.jpg', 608, 1080, 'Women and children browsing donated clothes and shoes on the pavement'],
+      ['29.jpg', 1080, 810, 'Volunteer and a young woman at the clothing display'],
+      ['30.jpg', 1000, 750, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['31.jpg', 1080, 810, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['32.jpg', 608, 1080, 'Community members choosing donated clothes during the Christmas outreach'],
+      ['1.jpg', 1000, 750, 'Donated clothes and shoes laid out on the steps'],
+      ['2.jpg', 750, 1000, 'Bags of donated items at the outreach point'],
+      ['3.jpg', 750, 1000, 'Bags of donated items at the outreach point'],
+      ['4.jpg', 810, 1080, 'Donated items and a sign at the outreach point'],
+      ['5.jpg', 750, 1000, 'A volunteer holding a bag of donated items']
+    ]) }
+]

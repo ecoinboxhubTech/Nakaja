@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
 import { Icon, Badge } from './components/Shell.jsx'
 import { Reveal, Stagger, Item, Words, Counter, Tap, Tilt, ease } from './components/motion.jsx'
-import { PROGRAMS, STATS, STEPS, VALUES, WAYS, FAQ, TONES } from './data.js'
+import { PROGRAMS, STATS, STEPS, VALUES, WAYS, FAQ, TONES, GALLERY } from './data.js'
 
 const Head = ({ eyebrow, children, sub, center = true }) => (
   <Reveal className={`mb-12 max-w-3xl ${center ? 'mx-auto text-center' : ''}`}>
@@ -114,6 +114,74 @@ export function Programs() {
           })}
         </Stagger>
       </div>
+    </section>)
+}
+
+/* ───────────── GALLERY ───────────── */
+export function Gallery() {
+  const [cat, setCat] = useState(GALLERY[0].id)
+  const [sel, setSel] = useState(null) // index of the open photo
+  const c = GALLERY.find(x => x.id === cat)
+  const photos = c.photos
+  const close = useCallback(() => setSel(null), [])
+  const step = useCallback(d => setSel(i => (i === null ? i : (i + d + photos.length) % photos.length)), [photos.length])
+  useEffect(() => {
+    if (sel === null) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const k = e => { if (e.key === 'Escape') close(); else if (e.key === 'ArrowRight') step(1); else if (e.key === 'ArrowLeft') step(-1) }
+    window.addEventListener('keydown', k)
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', k) }
+  }, [sel, close, step])
+  const p = sel === null ? null : photos[sel]
+  return (
+    <section id="gallery" className="bg-white py-16 md:py-28">
+      <div className="wrap">
+        <Reveal className="mb-10 grid items-end gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8"><span className="eyebrow">Gallery</span>
+            <h2 className="h2 mt-3 lg:!text-6xl">Moments from the <span className="grad">work we do.</span></h2></div>
+          <p className="text-lg leading-relaxed text-ink-500 lg:col-span-4">A look at our outreach programmes: the girls, the classrooms and the communities we show up for.</p>
+        </Reveal>
+        <div className="-mx-5 mb-8 flex gap-2 overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0 [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Gallery categories">
+          {GALLERY.map(({ id, label, icon, photos: ph }) => (
+            <button key={id} role="tab" aria-selected={cat === id} onClick={() => { setCat(id); setSel(null) }}
+              className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition ${cat === id ? 'bg-brand-500 text-white shadow-pink' : 'bg-ink-100 text-ink-500 hover:bg-brand-50 hover:text-brand-600'}`}>
+              <Icon n={icon} c="!text-[18px]" />{label}<span className={`text-xs ${cat === id ? 'text-white/70' : 'text-ink-400'}`}>{ph.length || 'soon'}</span>
+            </button>))}
+        </div>
+        <p className="mb-6 max-w-2xl text-ink-500">{c.blurb}</p>
+        {photos.length ? (
+          <div className="columns-2 gap-3 md:columns-3 md:gap-4 lg:columns-4">
+            {photos.map((ph, i) => (
+              <button key={ph.src} onClick={() => setSel(i)} aria-label={`Open photo: ${ph.alt}`} className="group relative mb-3 block w-full overflow-hidden rounded-2xl bg-ink-100 ring-1 ring-ink-200 md:mb-4">
+                <img src={ph.src} alt={ph.alt} width={ph.w} height={ph.h} loading="lazy" decoding="async" className="h-auto w-full transition duration-500 group-hover:scale-105" />
+                <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent opacity-0 transition group-hover:opacity-100" />
+                <span className="absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white text-ink opacity-0 transition group-hover:opacity-100"><Icon n="zoom_in" c="!text-[20px]" /></span>
+              </button>))}
+          </div>
+        ) : (
+          <div className="grid place-items-center rounded-3xl bg-brand-50/60 px-6 py-16 text-center ring-1 ring-brand-100">
+            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white text-brand-500 shadow-soft"><Icon n="photo_library" c="!text-[28px]" /></span>
+            <h3 className="mt-4 text-xl font-extrabold">Photos coming soon</h3>
+            <p className="mt-2 max-w-sm text-sm text-ink-500">We’re putting together pictures from {c.label.toLowerCase()}. Check back shortly.</p>
+          </div>)}
+      </div>
+
+      <AnimatePresence>
+        {p && (
+          <motion.div role="dialog" aria-modal="true" aria-label={p.alt} className="fixed inset-0 z-[95] flex flex-col bg-ink/95 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close}>
+            <div className="flex items-center justify-between px-4 py-3 text-white" onClick={e => e.stopPropagation()}>
+              <span className="text-sm font-semibold text-white/70">{c.label} · {sel + 1} / {photos.length}</span>
+              <button onClick={close} aria-label="Close" className="grid h-11 w-11 place-items-center rounded-full bg-white/10 transition hover:bg-white/20"><Icon n="close" /></button>
+            </div>
+            <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-4 md:px-16">
+              {photos.length > 1 && <button onClick={e => { e.stopPropagation(); step(-1) }} aria-label="Previous photo" className="absolute left-2 z-10 grid h-11 w-11 place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30 md:left-5"><Icon n="chevron_left" /></button>}
+              <motion.img key={p.src} src={p.src} alt={p.alt} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} onClick={e => e.stopPropagation()} className="max-h-full max-w-full rounded-xl object-contain shadow-soft" />
+              {photos.length > 1 && <button onClick={e => { e.stopPropagation(); step(1) }} aria-label="Next photo" className="absolute right-2 z-10 grid h-11 w-11 place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30 md:right-5"><Icon n="chevron_right" /></button>}
+            </div>
+            <p className="px-6 pb-5 text-center text-sm text-white/70" onClick={e => e.stopPropagation()}>{p.alt}</p>
+          </motion.div>)}
+      </AnimatePresence>
     </section>)
 }
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { MotionConfig } from 'framer-motion'
 import { Header, Footer, Support } from './components/Shell.jsx'
 import Chat from './components/Chat.jsx'
-import { Hero, Marquee, Programs, Stats, About, Journey, Values, Founder, Book, Involved, Faq, Cta, Contact } from './sections.jsx'
+import { Hero, Marquee, Programs, Gallery, Stats, About, Journey, Values, Founder, Book, Involved, Faq, Cta, Contact } from './sections.jsx'
 import { NAV } from './data.js'
 
 export default function App() {
@@ -25,6 +25,7 @@ export default function App() {
         <Hero onSupport={() => setSupport(true)} />
         <Marquee />
         <Programs />
+        <Gallery />
         <Stats />
         <About />
         <Journey />
