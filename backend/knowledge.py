@@ -1,6 +1,6 @@
-// Single source of truth for what the assistant may say. Keep it factual: the assistant is told
-// to refuse to go beyond this. Edit here when programmes, contacts or policies change.
-export const FAQ_TEXT = `
+# Single source of truth for what the assistant may say. Keep it factual: the assistant is told
+# to refuse to go beyond this. Edit here when programmes, contacts or policies change.
+FAQ_TEXT = """
 ORGANISATION: Nakajah Care Foundation (NAKAJAH). Based in Nigeria, working across communities in Africa. Email: hello@nakajahcare.org. Replies within 24 hours.
 MISSION: Create safe and nurturing spaces where children, women and young people are heard, protected, mentored, educated and empowered with the knowledge, opportunities and confidence to thrive. Through mentorship, advocacy, education, protection and sustainable empowerment, NAKAJAH works to prevent violence, promote equality and ensure no one is left behind.
 VISION: A beacon of hope where every child is protected, every woman is empowered, every young person is equipped to succeed, and every community is inspired to build a future free from violence, inequality and poverty.
@@ -13,4 +13,4 @@ SAFEGUARDING: Staff and mentors are vetted and trained in safeguarding; a child 
 VOLUNTEERING FROM ABROAD: Yes, remote mentoring, skills sessions, design and fundraising support are open to volunteers anywhere.
 USE OF SUPPORT: Contributions fund mentorship programmes, school materials, safe-space activities and training; progress is shared with partners regularly.
 NOT KNOWN (do not guess): fees, exact dates, locations of sessions, phone numbers, bank details, staff names other than the founder, application deadlines.
-`.trim()
+""".strip()
