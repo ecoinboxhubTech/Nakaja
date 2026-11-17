@@ -97,7 +97,7 @@ The site is a single, animated, mobile-friendly page with these sections: Home (
 
 - **Single-page marketing site** with scroll-spy navigation, smooth animations (which respect the visitor's "reduce motion" setting) and a responsive layout.
 - **"Get support" panel**: a confidential help panel for young people, parents and teachers, with an emergency reminder (112) and ways to reach the team.
-- **NAKAJAH Assistant (AI chat widget)**: a floating chat window that answers questions about programmes, volunteering, sponsorship, partnerships and safeguarding. It answers **only from a fixed knowledge base** (`backend/knowledge.js`), so it does not invent facts, phone numbers or promises.
+- **NAKAJAH Assistant (AI chat widget)**: a floating chat window that answers questions about programmes, volunteering, sponsorship, partnerships and safeguarding. It answers **only from a fixed knowledge base** (`backend/knowledge.py`), so it does not invent facts, phone numbers or promises.
 - **Contact form**: visitors pick why they are writing (partner, volunteer, sponsor, invite us to a school, get support, other). They receive an instant confirmation email and the team receives the message plus an AI-drafted reply.
 - **Email fallback**: if the backend is unreachable, the contact form opens the visitor's own email app with the message pre-filled so nothing is lost.
 - **SEO and sharing**: the production build is **pre-rendered** to static HTML so search engines and link previews (Google, Bing, WhatsApp, Facebook, LinkedIn) see real content without running JavaScript. It includes structured data (schema.org NGO, Person, Book, FAQ), Open Graph and Twitter cards, a sitemap, `robots.txt` and a web manifest.
@@ -115,7 +115,7 @@ The site is a single, animated, mobile-friendly page with these sections: Home (
 
 Because NAKAJAH works with children and survivors of violence, the software is deliberately conservative:
 
-- **A keyword safety filter** (`backend/safety.js`) scans chat messages and contact-form messages for signs of abuse, sexual violence, bullying, self-harm or suicide, trafficking, forced or child marriage, pregnancy-related crisis, running away, and general danger.
+- **A keyword safety filter** (`backend/safety.py`) scans chat messages and contact-form messages for signs of abuse, sexual violence, bullying, self-harm or suicide, trafficking, forced or child marriage, pregnancy-related crisis, running away, and general danger.
 - **Flagged chat messages are never sent to the AI.** The visitor instead receives a fixed, compassionate reply that points them to emergency services (112 in Nigeria), a trusted adult and the contact form.
 - **Flagged form or email messages are never auto-answered.** The sender gets an acknowledgement with the emergency note, and the team receives an email titled **`[URGENT - SAFEGUARDING]`** with no AI draft, asking staff to follow the child protection procedure and reply personally.
 - **The AI is restricted by design**: it must not give medical, legal or counselling advice, must not ask children for identifying details, must not claim to be human and must refuse instructions hidden inside user text.
@@ -152,13 +152,13 @@ nakajah/
 │           ├── Shell.jsx      # Header, footer, logo, icons, "Get support" panel
 │           ├── Chat.jsx       # AI chat widget
 │           └── motion.jsx     # Animation helpers
-└── backend/                   # Node server (API + serves the built site)
-    ├── index.js               # HTTP server and routes
-    ├── ai.js                  # AI assistant and email drafting (Groq API)
-    ├── safety.js              # Safeguarding filter, rate limiter, input helpers
-    ├── mail.js                # Email sending (Resend) with mock mode
-    ├── knowledge.js           # Facts the AI is allowed to use
-    ├── package.json
+└── backend/                   # Python FastAPI server (API + serves the built site)
+    ├── main.py                # FastAPI app, routes and static file serving
+    ├── ai.py                  # AI assistant and email drafting (Groq API)
+    ├── safety.py              # Safeguarding filter, rate limiter, input helpers
+    ├── mail.py                # Email sending (Resend) with mock mode
+    ├── knowledge.py           # Facts the AI is allowed to use
+    ├── requirements.txt       # Python dependencies
     └── .env.example           # Template for your secrets/config
 ```
 
@@ -170,12 +170,12 @@ nakajah/
 |---|---|
 | Frontend | React 18, Vite 5, Tailwind CSS 3, Framer Motion |
 | Rendering | Static pre-rendering (React server rendering at build time, hydrated in the browser) |
-| Backend | Plain Node.js (built-in `http`, `fetch`, `zlib`); **no third-party dependencies** |
+| Backend | Python [FastAPI](https://fastapi.tiangolo.com) served by Uvicorn (`httpx` for outbound API calls) |
 | AI | [Groq](https://console.groq.com) chat completions (default model `openai/gpt-oss-120b`) |
 | Email | [Resend](https://resend.com) |
 | Fonts / icons | Plus Jakarta Sans and Material Symbols Rounded (Google Fonts) |
 
-**Requirements:** Node.js **20.18 or newer** (22 LTS recommended) and npm.
+**Requirements:** Node.js **20.18 or newer** and npm (frontend), and Python **3.10 or newer** (backend).
 
 ---
 
@@ -188,9 +188,16 @@ cd frontend
 npm install
 ```
 
-The backend has no dependencies, so it needs no install step.
+### 6.2 Install the backend
 
-### 6.2 Configure the backend
+```bash
+cd backend
+python -m venv .venv
+# Windows: .venv\Scriptsctivate     macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 6.3 Configure the backend
 
 ```bash
 cd backend
@@ -200,12 +207,12 @@ cp .env.example .env
 
 You can skip the keys to try the project in mock mode.
 
-### 6.3 Run in development (two terminals)
+### 6.4 Run in development (two terminals)
 
 ```bash
 # Terminal 1: backend API on http://localhost:8787
 cd backend
-npm run dev
+uvicorn main:app --reload --port 8787
 
 # Terminal 2: frontend with hot reload on http://localhost:5173
 cd frontend
@@ -214,14 +221,14 @@ npm run dev
 
 The Vite dev server automatically forwards `/api/*` requests to the backend on port 8787, so the chat widget and contact form work in development.
 
-### 6.4 Run as in production (single server)
+### 6.5 Run as in production (single server)
 
 ```bash
 cd frontend
 npm run build        # creates frontend/dist, pre-rendered for SEO
 
 cd ../backend
-npm start            # serves the site and the API on http://localhost:8787
+python main.py      # serves the site and the API on http://localhost:8787
 ```
 
 Open <http://localhost:8787> and check <http://localhost:8787/api/health>.
@@ -238,8 +245,8 @@ Open <http://localhost:8787> and check <http://localhost:8787/api/health>.
 
 | Command | What it does |
 |---|---|
-| `npm start` | Runs the server, loading `.env` if it exists. |
-| `npm run dev` | Same, but restarts automatically when files change. |
+| `python main.py` | Runs the server, loading `.env` if it exists. |
+| `uvicorn main:app --reload --port 8787` | Same, but restarts automatically when files change. |
 
 ---
 
@@ -266,12 +273,12 @@ Frontend build option: set `SITE_URL` when building (for example `SITE_URL=https
 
 ## 8. Deployment
 
-The backend serves both the API and the built website, so a single Node process is enough.
+The backend serves both the API and the built website, so a single Python process is enough.
 
 1. Build the frontend: `cd frontend && npm install && npm run build`.
-2. Copy the project to your server (or connect the repository to a Node host such as Render, Railway, Fly.io or a VPS).
+2. Copy the project to your server (or connect the repository to a host such as Render, Railway, Fly.io or a VPS).
 3. Set the environment variables from section 7 on the host (do not upload a `.env` file to a public place).
-4. Start the server with `cd backend && npm start`, and put it behind HTTPS (for example via your host's built-in TLS, Nginx or Caddy).
+4. Start the server with `cd backend && pip install -r requirements.txt && python main.py`, and put it behind HTTPS (for example via your host's built-in TLS, Nginx or Caddy).
 5. Point your domain at the server and set `SITE_URL` to it when building so the canonical URLs, sitemap and robots.txt are correct.
 6. (Optional) Configure your email provider's inbound webhook to `https://your-domain/api/inbound-email?secret=YOUR_INBOUND_SECRET`.
 
@@ -296,7 +303,7 @@ The server compresses text responses with gzip, sets long cache lifetimes on has
 |---|---|
 | `Cannot find module` or `vite: not found` | Run `npm install` inside `frontend/`. |
 | Backend shows a blank page or 404 at `/` | The frontend has not been built. Run `npm run build` in `frontend/`. |
-| `node: bad option: --env-file-if-exists` | Node is too old. Upgrade to Node 20.18+ or 22+. |
+| `ModuleNotFoundError` (fastapi, httpx, dotenv…) | Activate the virtual environment and run `pip install -r requirements.txt` in `backend/`. |
 | Chat gives generic answers | `GROQ_API_KEY` is missing or invalid. Check `/api/health` (`"ai": false`). |
 | No emails arrive | `RESEND_API_KEY` is missing, or your sending domain is not verified. Check `backend/outbox.log` in mock mode. |
 | Chat/form fails during development | Make sure the backend is running on port 8787 (the Vite proxy expects this port). If you changed `PORT`, update `proxy` in `frontend/vite.config.js`. |

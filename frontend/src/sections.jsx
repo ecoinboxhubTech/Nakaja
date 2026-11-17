@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
 import { Icon, Badge } from './components/Shell.jsx'
 import { Reveal, Stagger, Item, Words, Counter, Tap, Tilt, ease } from './components/motion.jsx'
+import { API } from './api.js'
 import { PROGRAMS, STATS, STEPS, VALUES, WAYS, FAQ, TONES, GALLERY } from './data.js'
 
 const Head = ({ eyebrow, children, sub, center = true }) => (
@@ -425,13 +426,11 @@ export function Contact() {
     const form = e.currentTarget, f = Object.fromEntries(new FormData(form))
     setState('sending')
     try {
-      const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f) })
+      const r = await fetch(`${API}/api/contact`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f) })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'failed')
       setState(d.urgent ? 'urgent' : 'sent'); form.reset()
     } catch {
-      // backend unavailable: fall back to the visitor's own email app so the message is never lost
-      window.location.href = `mailto:hello@nakajahcare.org?subject=${encodeURIComponent('Website enquiry: ' + f.topic)}&body=${encodeURIComponent(`Name: ${f.name}\nEmail: ${f.email}\n\n${f.message}`)}`
       setState('error')
     }
   }
@@ -462,7 +461,7 @@ export function Contact() {
             <AnimatePresence>
               {state === 'sent' && <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-3 flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-mint-500"><Icon n="check_circle" c="!text-[18px]" />Thank you! Check your inbox for a confirmation.</motion.p>}
               {state === 'urgent' && <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-3 rounded-xl bg-sun-100 p-3 text-center text-sm">Thank you for telling us. A team member will contact you personally. <b>If you are in immediate danger, call 112 now.</b></motion.p>}
-              {state === 'error' && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-center text-sm text-ink-500">We couldn’t reach our server, so we opened your email app instead.</motion.p>}
+              {state === 'error' && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-center text-sm text-ink-500">Sorry, we couldn’t send your message right now. Please try again, or reach us at hello@nakajahcare.org.</motion.p>}
             </AnimatePresence>
             <p className="mt-3 text-center text-[11px] text-ink-400">We respect your privacy. No spam. Youth-safe, always.</p>
           </form>

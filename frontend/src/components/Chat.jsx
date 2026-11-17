@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Icon, Mark } from './Shell.jsx'
 import { ease } from './motion.jsx'
+import { API } from '../api.js'
 
 const HELLO = { role: 'assistant', content: 'Hi, I’m the NAKAJAH Assistant, an AI helper. Ask me about our programmes, volunteering, sponsoring a girl’s education or partnering with us.' }
 const CHIPS = ['How can I volunteer?', 'What programmes do you run?', 'How do you keep children safe?', 'How can my school partner with you?']
@@ -21,12 +22,12 @@ export default function Chat({ open, setOpen, onUrgent }) {
     const next = [...msgs, { role: 'user', content: q }]
     setMsgs(next); setText(''); setBusy(true)
     try {
-      const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: next.slice(1) }) })
+      const r = await fetch(`${API}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: next.slice(1) }) })
       const d = await r.json()
       if (d.urgent) setUrgent(true)
       setMsgs(m => [...m, { role: 'assistant', content: d.reply || d.error || 'Sorry, something went wrong.' }])
     } catch {
-      setMsgs(m => [...m, { role: 'assistant', content: 'I can’t connect right now. Please email hello@nakajahcare.org and the team will help.' }])
+      setMsgs(m => [...m, { role: 'assistant', content: 'I can’t connect right now. Please try again in a moment.' }])
     } finally { setBusy(false) }
   }
 
