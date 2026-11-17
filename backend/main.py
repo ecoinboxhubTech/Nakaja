@@ -103,7 +103,7 @@ async def chat(request: Request):
         return {"reply": await chat_reply(history)}
     except Exception as e:
         print("chat error:", e)
-        return {"reply": "Sorry, I’m having trouble right now. Please email hello@nakajahcare.org and the team will help."}
+        return {"reply": "Sorry, I’m having trouble right now. Please try again in a moment."}
 
 
 # ── shared handler: an incoming message from the form or from email ──
@@ -163,7 +163,7 @@ async def contact(request: Request):
         return {"ok": True, "urgent": r["risky"]}
     except Exception as e:
         print("contact error:", e)
-        return JSONResponse({"error": "We could not send your message. Please email hello@nakajahcare.org."}, status_code=502)
+        return JSONResponse({"error": "We could not send your message right now. Please try again, or reach us at hello@nakajahcare.org."}, status_code=502)
 
 
 # ── POST /api/inbound-email (provider webhook → AI draft/reply) ───────────

@@ -32,7 +32,7 @@ SAFE_REPLY = (
     "I’m really sorry you’re going through this, and I’m glad you reached out. You deserve to be safe and heard.\n\n"
     + EMERGENCY_NOTE
     + "\n\nI’m an automated assistant, so I can’t give you the personal help you need. A real person from our team can. "
-    "Please use the contact form on this page or email hello@nakajahcare.org and tell us how to reach you safely; "
+    "Please use the contact form on this page and tell us how to reach you safely; "
     "we treat every message confidentially."
 )
 

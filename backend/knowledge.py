@@ -1,7 +1,7 @@
 # Single source of truth for what the assistant may say. Keep it factual: the assistant is told
 # to refuse to go beyond this. Edit here when programmes, contacts or policies change.
 FAQ_TEXT = """
-ORGANISATION: Nakajah Care Foundation (NAKAJAH). Based in Nigeria, working across communities in Africa. Email: hello@nakajahcare.org. Replies within 24 hours.
+ORGANISATION: Nakajah Care Foundation (NAKAJAH). Based in Nigeria, working across communities in Africa. Visitors reach the team through the contact form on the website. Replies within 24 hours.
 MISSION: Create safe and nurturing spaces where children, women and young people are heard, protected, mentored, educated and empowered with the knowledge, opportunities and confidence to thrive. Through mentorship, advocacy, education, protection and sustainable empowerment, NAKAJAH works to prevent violence, promote equality and ensure no one is left behind.
 VISION: A beacon of hope where every child is protected, every woman is empowered, every young person is equipped to succeed, and every community is inspired to build a future free from violence, inequality and poverty.
 FOUNDER: Dr. Lilian Odinakachi Onyeizu, PhD. Gender & Development consultant, author and mentor, 10+ years across Africa. Author of the book "I Know Me. I Lead Me. I Choose Well." (A Girl's Guide to Identity, Self-Leadership, Healthy Choices, Relationships, and Purpose).

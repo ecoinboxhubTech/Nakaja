@@ -27,7 +27,7 @@ export default function Chat({ open, setOpen, onUrgent }) {
       if (d.urgent) setUrgent(true)
       setMsgs(m => [...m, { role: 'assistant', content: d.reply || d.error || 'Sorry, something went wrong.' }])
     } catch {
-      setMsgs(m => [...m, { role: 'assistant', content: 'I can’t connect right now. Please email hello@nakajahcare.org and the team will help.' }])
+      setMsgs(m => [...m, { role: 'assistant', content: 'I can’t connect right now. Please try again in a moment.' }])
     } finally { setBusy(false) }
   }
 
