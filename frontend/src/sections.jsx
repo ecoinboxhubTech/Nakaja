@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
 import { Icon, Badge } from './components/Shell.jsx'
 import { Reveal, Stagger, Item, Words, Counter, Tap, Tilt, ease } from './components/motion.jsx'
+import { API } from './api.js'
 import { PROGRAMS, STATS, STEPS, VALUES, WAYS, FAQ, TONES, GALLERY } from './data.js'
 
 const Head = ({ eyebrow, children, sub, center = true }) => (
@@ -425,7 +426,7 @@ export function Contact() {
     const form = e.currentTarget, f = Object.fromEntries(new FormData(form))
     setState('sending')
     try {
-      const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f) })
+      const r = await fetch(`${API}/api/contact`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f) })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'failed')
       setState(d.urgent ? 'urgent' : 'sent'); form.reset()

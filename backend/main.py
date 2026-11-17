@@ -15,6 +15,7 @@ from contextlib import asynccontextmanager
 from urllib.parse import quote, unquote
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from ai import ai_enabled, chat_reply, draft_email
@@ -35,6 +36,14 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Nakajah Care Foundation API", lifespan=lifespan)
+
+# Allow the frontend (when hosted on a different origin) to call the API. Comma-separated; "*" by default.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in (os.getenv("CORS_ORIGINS") or "*").split(",") if o.strip()],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
+)
 
 
 class BadRequest(Exception):
