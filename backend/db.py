@@ -18,10 +18,31 @@ class Duplicate(Exception):
     """The unique action_id already exists (a chat confirmation was reused)."""
 
 
+# Created automatically on first use (idempotent, safe to run on every cold start).
+SCHEMA = """
+create table if not exists contact_messages (
+  id           uuid primary key default gen_random_uuid(),
+  created_at   timestamptz not null default now(),
+  source       text not null,
+  name         text,
+  email        text not null,
+  subject      text,
+  message      text not null,
+  risky        boolean not null default false,
+  ai_draft     text,
+  auto_replied boolean not null default false,
+  action_id    text unique
+);
+alter table contact_messages enable row level security;
+"""
+
+
 async def _get_pool() -> asyncpg.Pool:
     global _pool
     if _pool is None:
-        _pool = await asyncpg.create_pool(DSN, min_size=0, max_size=2, statement_cache_size=0, timeout=10, command_timeout=10)
+        pool = await asyncpg.create_pool(DSN, min_size=0, max_size=2, statement_cache_size=0, timeout=10, command_timeout=10)
+        await pool.execute(SCHEMA)
+        _pool = pool  # only cached once the tables exist, so a failed setup is retried next request
     return _pool
 
 
