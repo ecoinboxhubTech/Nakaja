@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from ai import ai_enabled, chat_reply, draft_email
+from tools import verify
 from mail import FROM, STAFF, send_mail
 from safety import EMERGENCY_NOTE, SAFE_REPLY, clip, email_of, is_risk, limited
 
@@ -100,10 +101,27 @@ async def chat(request: Request):
     if any(is_risk(m["content"]) for m in [m for m in history if m["role"] == "user"][-2:]):
         return {"reply": SAFE_REPLY, "urgent": True}
     try:
-        return {"reply": await chat_reply(history)}
+        reply, pending = await chat_reply(history)
+        return {"reply": reply, **({"pending": pending} if pending else {})}
     except Exception as e:
         print("chat error:", e)
         return {"reply": "Sorry, I’m having trouble right now. Please try again in a moment."}
+
+
+# ── POST /api/chat/confirm (visitor pressed Confirm on a request the assistant prepared) ──
+@app.post("/api/chat/confirm")
+async def chat_confirm(request: Request):
+    if limited(ip_of(request), "contact", 5, 60 * 60):  # same budget as the contact form
+        return JSONResponse({"error": "Too many messages. Please try again later."}, status_code=429)
+    data = verify((await read_body(request)).get("token"))
+    if not data:
+        return JSONResponse({"error": "This request expired. Please ask the assistant again."}, status_code=400)
+    try:
+        r = await handle_inbound(name=data["name"], email=data["email"], subject=one_line(data["topic"]), message=data["message"], source="Chat assistant")
+        return {"ok": True, "urgent": r["risky"]}
+    except Exception as e:
+        print("chat confirm error:", e)
+        return JSONResponse({"error": "We could not send your message right now. Please try again, or reach us at hello@nakajahcare.org."}, status_code=502)
 
 
 # ── shared handler: an incoming message from the form or from email ──
