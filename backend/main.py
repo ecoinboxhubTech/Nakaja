@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from ai import ai_enabled, chat_reply, draft_email
+import db
 from tools import verify
 from mail import FROM, STAFF, send_mail
 from safety import EMERGENCY_NOTE, SAFE_REPLY, clip, email_of, is_risk, limited
@@ -117,16 +118,20 @@ async def chat_confirm(request: Request):
     if not data:
         return JSONResponse({"error": "This request expired. Please ask the assistant again."}, status_code=400)
     try:
-        r = await handle_inbound(name=data["name"], email=data["email"], subject=one_line(data["topic"]), message=data["message"], source="Chat assistant")
-        return {"ok": True, "urgent": r["risky"]}
+        r = await handle_inbound(name=data["name"], email=data["email"], subject=one_line(data["topic"]), message=data["message"], source="Chat assistant", action_id=data.get("jti"))
+    except db.Duplicate:
+        return JSONResponse({"error": "That message was already sent."}, status_code=409)
     except Exception as e:
         print("chat confirm error:", e)
         return JSONResponse({"error": "We could not send your message right now. Please try again, or reach us at hello@nakajahcare.org."}, status_code=502)
+    return {"ok": True, "urgent": r["risky"]}
 
 
 # ── shared handler: an incoming message from the form or from email ──
-async def handle_inbound(*, name: str, email: str, subject: str, message: str, source: str) -> dict:
+async def handle_inbound(*, name: str, email: str, subject: str, message: str, source: str, action_id: str | None = None) -> dict:
     risky = is_risk(message) or is_risk(subject)
+    # Save first so nothing is lost if AI or email fails (raises db.Duplicate for a reused chat confirmation).
+    row_id = await db.insert({"source": source, "name": name, "email": email, "subject": subject, "message": message, "risky": risky, "action_id": action_id})
     draft = None
     if not risky:
         try:
@@ -134,6 +139,7 @@ async def handle_inbound(*, name: str, email: str, subject: str, message: str, s
         except Exception as e:
             print("draft error:", e)
     send_direct = bool(AUTO and not risky and draft)
+    await db.update(row_id, {"ai_draft": draft, "auto_replied": send_direct})
 
     # 1) Reply to the sender
     if send_direct:

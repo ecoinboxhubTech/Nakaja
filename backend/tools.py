@@ -9,6 +9,7 @@ import hmac
 import json
 import os
 import re
+import secrets
 import time
 
 from knowledge import FAQ_TEXT
@@ -66,7 +67,7 @@ def prepare_contact_request(name: str = "", email: str = "", topic: str = "", me
     if not name or not em or len(message) < 5:
         return "Missing details. Ask the visitor for their name, a valid email address and what they want to say.", None
     data = {"name": name, "email": em, "topic": topic, "message": message}
-    pending = {"token": _sign({**data, "exp": int(time.time()) + TTL}), "summary": data}
+    pending = {"token": _sign({**data, "jti": secrets.token_hex(12), "exp": int(time.time()) + TTL}), "summary": data}
     return "Prepared. The visitor now sees the details with Confirm and Cancel buttons. Nothing is sent until they press Confirm. Briefly tell them to check the details and confirm.", pending
 
 
