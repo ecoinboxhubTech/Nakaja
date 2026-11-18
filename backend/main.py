@@ -19,6 +19,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from ai import ai_enabled, chat_reply, draft_email
+import db
+from tools import ACTIONS_ENABLED, verify
 from mail import FROM, STAFF, send_mail
 from safety import EMERGENCY_NOTE, SAFE_REPLY, clip, email_of, is_risk, limited
 
@@ -100,15 +102,36 @@ async def chat(request: Request):
     if any(is_risk(m["content"]) for m in [m for m in history if m["role"] == "user"][-2:]):
         return {"reply": SAFE_REPLY, "urgent": True}
     try:
-        return {"reply": await chat_reply(history)}
+        reply, pending = await chat_reply(history)
+        return {"reply": reply, **({"pending": pending} if pending else {})}
     except Exception as e:
         print("chat error:", e)
         return {"reply": "Sorry, I’m having trouble right now. Please try again in a moment."}
 
 
+# ── POST /api/chat/confirm (visitor pressed Confirm on a request the assistant prepared) ──
+@app.post("/api/chat/confirm")
+async def chat_confirm(request: Request):
+    if limited(ip_of(request), "contact", 5, 60 * 60):  # same budget as the contact form
+        return JSONResponse({"error": "Too many messages. Please try again later."}, status_code=429)
+    data = verify((await read_body(request)).get("token"))
+    if not data:
+        return JSONResponse({"error": "This request expired. Please ask the assistant again."}, status_code=400)
+    try:
+        r = await handle_inbound(name=data["name"], email=data["email"], subject=one_line(data["topic"]), message=data["message"], source="Chat assistant", action_id=data.get("jti"))
+    except db.Duplicate:
+        return JSONResponse({"error": "That message was already sent."}, status_code=409)
+    except Exception as e:
+        print("chat confirm error:", e)
+        return JSONResponse({"error": "We could not send your message right now. Please try again, or reach us at hello@nakajahcare.org."}, status_code=502)
+    return {"ok": True, "urgent": r["risky"]}
+
+
 # ── shared handler: an incoming message from the form or from email ──
-async def handle_inbound(*, name: str, email: str, subject: str, message: str, source: str) -> dict:
+async def handle_inbound(*, name: str, email: str, subject: str, message: str, source: str, action_id: str | None = None) -> dict:
     risky = is_risk(message) or is_risk(subject)
+    # Save first so nothing is lost if AI or email fails (raises db.Duplicate for a reused chat confirmation).
+    row_id = await db.insert({"source": source, "name": name, "email": email, "subject": subject, "message": message, "risky": risky, "action_id": action_id})
     draft = None
     if not risky:
         try:
@@ -116,6 +139,7 @@ async def handle_inbound(*, name: str, email: str, subject: str, message: str, s
         except Exception as e:
             print("draft error:", e)
     send_direct = bool(AUTO and not risky and draft)
+    await db.update(row_id, {"ai_draft": draft, "auto_replied": send_direct})
 
     # 1) Reply to the sender
     if send_direct:
@@ -198,7 +222,8 @@ async def inbound(request: Request):
 
 @app.api_route("/api/health", methods=["GET", "POST", "HEAD"])
 async def health():
-    return {"ok": True, "ai": ai_enabled, "mail": bool(os.getenv("RESEND_API_KEY")), "mode": MODE}
+    return {"ok": True, "ai": ai_enabled, "mail": bool(os.getenv("RESEND_API_KEY")) or bool(os.getenv("SMTP_USER") and os.getenv("SMTP_PASS")),
+            "db": db.enabled, "actions": ACTIONS_ENABLED, "mode": MODE}
 
 
 @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"])

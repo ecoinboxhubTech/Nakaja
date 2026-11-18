@@ -12,6 +12,7 @@ export default function Chat({ open, setOpen, onUrgent }) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [urgent, setUrgent] = useState(false)
+  const [pending, setPending] = useState(null)
   const end = useRef(null)
   useEffect(() => { end.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }) }, [msgs, busy, open])
   useEffect(() => { if (!open) return; const k = e => e.key === 'Escape' && setOpen(false); window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k) }, [open, setOpen])
@@ -20,16 +21,32 @@ export default function Chat({ open, setOpen, onUrgent }) {
     const q = (t ?? text).trim()
     if (!q || busy) return
     const next = [...msgs, { role: 'user', content: q }]
-    setMsgs(next); setText(''); setBusy(true)
+    setMsgs(next); setText(''); setPending(null); setBusy(true)
     try {
       const r = await fetch(`${API}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: next.slice(1) }) })
       const d = await r.json()
       if (d.urgent) setUrgent(true)
+      if (d.pending) setPending(d.pending)
       setMsgs(m => [...m, { role: 'assistant', content: d.reply || d.error || 'Sorry, something went wrong.' }])
     } catch {
       setMsgs(m => [...m, { role: 'assistant', content: 'I can’t connect right now. Please try again in a moment.' }])
     } finally { setBusy(false) }
   }
+
+  async function confirm() {
+    const p = pending; if (!p || busy) return
+    setPending(null); setBusy(true)
+    try {
+      const r = await fetch(`${API}/api/chat/confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: p.token }) })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error || 'failed')
+      if (d.urgent) setUrgent(true)
+      setMsgs(m => [...m, { role: 'assistant', content: 'Done! Your message has been sent to our team. Check your inbox for a confirmation; we reply within 24 hours.' }])
+    } catch (e) {
+      setMsgs(m => [...m, { role: 'assistant', content: e.message && e.message !== 'failed' && e.message !== 'Failed to fetch' ? e.message : 'Sorry, I couldn’t send that. Please try again in a moment.' }])
+    } finally { setBusy(false) }
+  }
+  function cancel() { setPending(null); setMsgs(m => [...m, { role: 'assistant', content: 'No problem, I haven’t sent anything. Is there anything else I can help with?' }]) }
 
   return (<>
     <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }} onClick={() => setOpen(!open)} aria-label={open ? 'Close chat' : 'Chat with NAKAJAH Assistant'} aria-expanded={open}
@@ -54,6 +71,11 @@ export default function Chat({ open, setOpen, onUrgent }) {
                 <p className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.role === 'user' ? 'rounded-br-md bg-brand-500 text-white' : 'rounded-bl-md bg-white text-ink shadow-sm ring-1 ring-ink-200'}`}>{m.content}</p>
               </motion.div>))}
             {msgs.length === 1 && <div className="flex flex-wrap gap-2 pt-1">{CHIPS.map(c => <button key={c} onClick={() => send(c)} className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-brand-600 ring-1 ring-brand-200 transition hover:bg-brand-50">{c}</button>)}</div>}
+            {pending && <div className="rounded-2xl bg-white p-3 text-xs leading-relaxed shadow-sm ring-1 ring-brand-200">
+              <b className="block text-sm">Send this to the NAKAJAH team?</b>
+              <dl className="mt-2 space-y-1"><div><dt className="inline font-semibold">Name: </dt><dd className="inline">{pending.summary.name}</dd></div><div><dt className="inline font-semibold">Email: </dt><dd className="inline break-all">{pending.summary.email}</dd></div><div><dt className="inline font-semibold">Topic: </dt><dd className="inline">{pending.summary.topic}</dd></div><div><dt className="inline font-semibold">Message: </dt><dd className="inline whitespace-pre-wrap">{pending.summary.message}</dd></div></dl>
+              <div className="mt-3 flex gap-2"><button onClick={confirm} className="flex-1 rounded-full bg-brand-500 py-2 font-bold text-white hover:bg-brand-600">Confirm &amp; send</button><button onClick={cancel} className="flex-1 rounded-full bg-ink-100 py-2 font-bold hover:bg-ink-200">Cancel</button></div>
+            </div>}
             {urgent && <div className="rounded-2xl bg-sun-100 p-3 text-xs leading-relaxed"><b>Need help right now?</b> Call <b>112</b> (Nigeria) or tell a trusted adult. <button onClick={onUrgent} className="font-bold text-brand-600 underline">More ways to get help</button></div>}
             {busy && <div className="flex justify-start"><span className="flex gap-1 rounded-2xl rounded-bl-md bg-white px-4 py-3 ring-1 ring-ink-200">{[0, 1, 2].map(i => <motion.i key={i} className="h-2 w-2 rounded-full bg-brand-400" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }} />)}</span></div>}
             <div ref={end} />

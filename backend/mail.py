@@ -1,5 +1,8 @@
+import asyncio
 import os
+import smtplib
 from datetime import datetime, timezone
+from email.message import EmailMessage
 from pathlib import Path
 
 import httpx
@@ -18,10 +21,16 @@ async def send_mail(*, to: str, subject: str, text: str, reply_to: str | None = 
         f"{esc(text)}</div>"
     )
     api_key = os.getenv("RESEND_API_KEY")
+    smtp_user, smtp_pass = os.getenv("SMTP_USER"), os.getenv("SMTP_PASS")
+    if not api_key and smtp_user and smtp_pass:
+        return await asyncio.to_thread(_send_smtp, smtp_user, smtp_pass, to, subject, text, html, reply_to)
     if not api_key:
         stamp = datetime.now(timezone.utc).isoformat()
-        with OUTBOX.open("a", encoding="utf-8") as f:
-            f.write(f"\n--- {stamp}\nTO: {to}\nSUBJECT: {subject}\n{text}\n")
+        try:
+            with OUTBOX.open("a", encoding="utf-8") as f:
+                f.write(f"\n--- {stamp}\nTO: {to}\nSUBJECT: {subject}\n{text}\n")
+        except OSError:  # read-only filesystem (e.g. Vercel): the console log below is enough
+            pass
         print(f'[mail:mock] to={to} subject="{subject}"')
         return {"mock": True}
 
@@ -37,3 +46,18 @@ async def send_mail(*, to: str, subject: str, text: str, reply_to: str | None = 
     if r.status_code >= 400:
         raise RuntimeError(f"mail send failed: {r.status_code} {r.text[:200]}")
     return r.json()
+
+
+def _send_smtp(user: str, password: str, to: str, subject: str, text: str, html: str, reply_to: str | None):
+    """Gmail (or any SMTP) fallback for when there is no verified domain for Resend. Gmail rewrites From to the account address."""
+    msg = EmailMessage()
+    msg["From"] = f"NAKAJAH Care Foundation <{user}>"
+    msg["To"], msg["Subject"] = to, subject
+    if reply_to:
+        msg["Reply-To"] = reply_to
+    msg.set_content(text)
+    msg.add_alternative(html, subtype="html")
+    with smtplib.SMTP_SSL(os.getenv("SMTP_HOST") or "smtp.gmail.com", int(os.getenv("SMTP_PORT") or 465), timeout=20) as s:
+        s.login(user, password)
+        s.send_message(msg)
+    return {"smtp": True}
