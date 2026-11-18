@@ -20,7 +20,7 @@ from fastapi.responses import JSONResponse, Response
 
 from ai import ai_enabled, chat_reply, draft_email
 import db
-from tools import verify
+from tools import ACTIONS_ENABLED, verify
 from mail import FROM, STAFF, send_mail
 from safety import EMERGENCY_NOTE, SAFE_REPLY, clip, email_of, is_risk, limited
 
@@ -222,7 +222,8 @@ async def inbound(request: Request):
 
 @app.api_route("/api/health", methods=["GET", "POST", "HEAD"])
 async def health():
-    return {"ok": True, "ai": ai_enabled, "mail": bool(os.getenv("RESEND_API_KEY")), "mode": MODE}
+    return {"ok": True, "ai": ai_enabled, "mail": bool(os.getenv("RESEND_API_KEY")) or bool(os.getenv("SMTP_USER") and os.getenv("SMTP_PASS")),
+            "db": db.enabled, "actions": ACTIONS_ENABLED, "mode": MODE}
 
 
 @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"])

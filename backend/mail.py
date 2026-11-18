@@ -26,8 +26,11 @@ async def send_mail(*, to: str, subject: str, text: str, reply_to: str | None = 
         return await asyncio.to_thread(_send_smtp, smtp_user, smtp_pass, to, subject, text, html, reply_to)
     if not api_key:
         stamp = datetime.now(timezone.utc).isoformat()
-        with OUTBOX.open("a", encoding="utf-8") as f:
-            f.write(f"\n--- {stamp}\nTO: {to}\nSUBJECT: {subject}\n{text}\n")
+        try:
+            with OUTBOX.open("a", encoding="utf-8") as f:
+                f.write(f"\n--- {stamp}\nTO: {to}\nSUBJECT: {subject}\n{text}\n")
+        except OSError:  # read-only filesystem (e.g. Vercel): the console log below is enough
+            pass
         print(f'[mail:mock] to={to} subject="{subject}"')
         return {"mock": True}
 
